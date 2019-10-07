@@ -11,4 +11,5 @@ import java.util.List;
 public interface MoviesRepository extends MongoRepository<Movie, String> {
 
     List<Movie> findByTitle(String title);
+
 }

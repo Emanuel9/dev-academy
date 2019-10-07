@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orange.devacademy.moviesservice.controller.model.RestErrorCode;
 import com.orange.devacademy.moviesservice.controller.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 
 import static com.orange.devacademy.moviesservice.configuration.ApiConstants.API_V1;
 
@@ -33,6 +30,8 @@ public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
             API_V1 + "/status",
             API_V1 + "/version",
             API_V1 + "/doc",
+            "/register",
+            "/login",
             "/v2/api-docs",
             "/swagger-resources",
             "/swagger-resources/configuration/ui",
@@ -43,18 +42,16 @@ public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
             "/v2/api-docs",
             "/webjars/**"};
 
-    private static final String ROLES_USER = "USER";
-
-    @Autowired
-    private ApiProperties apiProperties;
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.formLogin();
+
         http.authorizeRequests()
                 .antMatchers(ENDPOINTS_NOAUTH)
                 .permitAll();
+
         http.authorizeRequests()
-                .antMatchers(API_ENDPOINT).hasRole(ROLES_USER).anyRequest().authenticated();
+                .antMatchers(API_ENDPOINT).authenticated();
         http.httpBasic().authenticationEntryPoint(delegateAuthenticationEntryPoint());
         http.csrf().disable();
     }
@@ -63,20 +60,6 @@ public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
                 .antMatchers(IGNORE_RESOURCES);
-    }
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        log.debug("Registering Basic Authentication Users");
-
-        for (ApiProperties.User user : apiProperties.getAuthentication().getUsers()) {
-            auth.inMemoryAuthentication()
-                    .passwordEncoder(passwordEncoder())
-                    .withUser(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRoles());
-            log.debug("user:{}, role:{}", user.getUsername(), Arrays.toString(user.getRoles()));
-        }
     }
 
     @Bean

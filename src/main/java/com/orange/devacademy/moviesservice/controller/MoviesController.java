@@ -2,6 +2,7 @@ package com.orange.devacademy.moviesservice.controller;
 
 import com.orange.devacademy.moviesservice.controller.response.ErrorResponse;
 import com.orange.devacademy.moviesservice.model.Movie;
+import com.orange.devacademy.moviesservice.service.UserService;
 import com.orange.devacademy.moviesservice.service.MoviesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -9,10 +10,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.HttpURLConnection;
 import java.util.List;
@@ -26,12 +24,13 @@ public class MoviesController {
 
     private final MoviesService moviesService;
 
-
     @Autowired
     public MoviesController(MoviesService moviesService) {
         this.moviesService = moviesService;
     }
 
+    @Autowired
+    public UserService userService;
 
     @ApiOperation(
             value = "Get movies", authorizations = {@Authorization(value = "basicAuthApi")}
@@ -51,4 +50,5 @@ public class MoviesController {
 
         return moviesService.getMyMovies();
     }
+
 }
